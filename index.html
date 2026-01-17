@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Math Sprout 60 Seconds: Fun Math Challenge for Kids</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --primary-bg: #fafff0; 
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --accent-blue: #4a90e2;
+            --accent-green: #1b5e20;
+            --accent-red: #f44336;
+            --darkest-green: #0a3d0c; 
+            --soft-green: #c8e6c9; 
+            --color-god: #fff3cd;      
+            --color-prof: #d1e7dd;     
+            --color-doc: #cfe2ff;      
+            --color-student: #f8d7da;  
+            --color-seed: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            touch-action: manipulation;
+        }
+
+        #game-box {
+            width: 100%; max-width: 480px; 
+            min-height: 100dvh; 
+            background: var(--card-bg);
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+            padding: 15px; 
+            box-sizing: border-box; position: relative;
+        }
+
+        .page { display: none; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; z-index: 1; }
+        .active { display: flex !important; }
+
+        h1 { color: var(--accent-green); margin-bottom: 5px; }
+        
+        .btn {
+            padding: 15px; margin: 8px; border: none; border-radius: 12px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            transition: transform 0.1s; width: 90%;
+            position: relative; z-index: 10;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-cake { background: #e8f5e9; color: var(--darkest-green); border: 2px solid #a5d6a7; }
+        .btn-pepper { background: #fff3e0; color: #ef6c00; border: 2px solid #ffcc80; }
+        .btn-volcano { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
+        .btn-home { background: #eeeeee; color: #616161; }
+        .btn-submit { background: var(--accent-blue); color: white; }
+
+        #game-header { 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 14px; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header-score { color: var(--text-main); flex: 1; text-align: left; }
+        .header-title-mode { color: var(--accent-green); flex: 2; text-align: center; }
+        .header-timer { color: var(--accent-blue); flex: 1; text-align: right; }
+
+        #question-display { 
+            font-size: 44px; font-weight: 800; 
+            margin: 18px 0; 
+            min-height: 60px; 
+            display: flex; align-items: center; justify-content: center;
+            transition: color 0.2s; line-height: 1.2;
+            width: 100%; text-align: center;
+        }
+
+        #q-text { min-width: 160px; display: inline-block; text-align: right; padding-right: 15px; }
+        #player-input { min-width: 80px; display: inline-block; text-align: left; color: var(--accent-blue); padding-left: 15px; }
+        
+        .wrong { color: var(--accent-red) !important; animation: shake 0.3s; }
+
+        #keypad { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            width: 100%; 
+            margin-top: 8px;
+        }
+        
+        .key { padding: 18px; background: #f5f5f5; border: none; border-radius: 8px; font-size: 24px; font-weight: bold; cursor: pointer; color: var(--darkest-green); }
+        .key-del { background: var(--soft-green); color: var(--darkest-green); font-size: 20px; border: none; }
+
+        .mistake-list { 
+            text-align: center; font-size: 14px; background: #fff5f5; 
+            padding: 12px; border-radius: 10px; margin-top: 10px; 
+            max-height: 120px; overflow-y: auto; width: 100%; 
+        }
+        .home-info { font-size: 12px; color: #666; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-top: 20px; width: 90%; line-height: 1.6; }
+
+        .lv-god { background-color: var(--color-god) !important; }
+        .lv-prof { background-color: var(--color-prof) !important; }
+        .lv-doc { background-color: var(--color-doc) !important; }
+        .lv-student { background-color: var(--color-student) !important; }
+        .lv-seed { background-color: var(--color-seed) !important; }
+
+        #modal-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        #modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; text-align: center; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; }
+
+        footer { font-size: 11px; color: #cccccc; margin: 5px 0; text-align: center; width: 100%; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div id="page-home" class="page active">
+        <h1>🌱 Math Sprout 60 Seconds</h1>
+        <p>Choose your math garden!</p>
+        <button type="button" class="btn btn-cake" onclick="javascript:initGame('cake');">🍰 Piece of Cake</button>
+        <button type="button" class="btn btn-pepper" onclick="javascript:initGame('pepper');">🌶️ Hot Pepper</button>
+        <button type="button" class="btn btn-volcano" onclick="javascript:initGame('volcano');">🌋 Spicy Volcano</button>
+        <button type="button" class="btn btn-home" style="margin-top:10px;" onclick="javascript:viewRankings();">🏆 Hall of Fame</button>
+        
+        <div class="home-info">
+            <b>[Level System]</b><br>
+            - 👑 Math God: 48+ problems<br>
+            - 🎓 Professor Logic: 36 - 47<br>
+            - 🩺 Doctor Calculation: 20 - 35<br>
+            - 🌟 Brilliant Student: 12 - 19<br>
+            - 👶 Seed Baby: Under 12<br><br>
+            <b>[Ranking Reset]</b><br>
+            Leaderboards are reset every <b>Monday at 09:00 AM</b>.
+        </div>
+    </div>
+
+    <div id="page-play" class="page">
+        <div id="game-header">
+            <span class="header-score">✅ <span id="current-score">0</span></span>
+            <span class="header-title-mode">🌱 Math Sprout <span id="display-mode-emoji"></span></span>
+            <span class="header-timer">⏱️ <span id="timer">60</span>s</span>
+        </div>
+        
+        <div id="question-display">
+            <span id="q-text">Ready?</span><span>=</span><span id="player-input"></span>
+        </div>
+        
+        <div id="keypad">
+            <button class="key" onclick="handleInput(1)">1</button><button class="key" onclick="handleInput(2)">2</button><button class="key" onclick="handleInput(3)">3</button>
+            <button class="key" onclick="handleInput(4)">4</button><button class="key" onclick="handleInput(5)">5</button><button class="key" onclick="handleInput(6)">6</button>
+            <button class="key" onclick="handleInput(7)">7</button><button class="key" onclick="handleInput(8)">8</button><button class="key" onclick="handleInput(9)">9</button>
+            <button class="key" style="visibility:hidden;"></button>
+            <button class="key" onclick="handleInput(0)">0</button>
+            <button class="key key-del" onclick="handleInput('del')">DEL</button>
+        </div>
+        <div style="display:flex; width:100%; margin-top:10px;">
+            <button class="btn btn-home" style="flex:1" onclick="initGame(currentDifficulty)">🔄 Retry</button>
+            <button class="btn btn-home" style="flex:1" onclick="showPage('home')">🏠 Home</button>
+        </div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-lv-title">Level Name</h2>
+        <p id="res-score-msg" style="font-size: 20px; font-weight: bold; margin-bottom: 5px;"></p>
+        <p id="res-random-msg" style="color: #555; margin: 10px; font-weight: 500;"></p>
+        <p id="res-rank-msg" style="color: var(--accent-blue); font-weight: bold; font-size: 18px; margin: 5px;"></p>
+        <div id="wrong-answer-report" class="mistake-list" style="margin-bottom: 15px;"></div>
+
+        <div id="rank-submission" style="width: 100%;">
+            <input type="text" id="nickname" placeholder="Nickname" maxlength="10" style="display: block; padding:15px; width:80%; border:1px solid #ddd; border-radius:10px; margin: 0 auto 15px auto; font-size:16px; text-align:center;">
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn btn-submit" style="margin:0; flex:1;" onclick="pushRank()">Submit</button>
+                <button class="btn btn-home" style="margin:0; flex:1;" onclick="showPage('home')">Home</button>
+            </div>
+        </div>
+        <div id="fail-actions" style="width: 100%; display:none;">
+            <button class="btn btn-pepper" onclick="initGame(currentDifficulty)">Retry</button>
+            <button class="btn btn-home" onclick="showPage('home')">Home</button>
+        </div>
+    </div>
+
+    <div id="page-rank" class="page">
+        <h2 id="rank-mode-label">Ranking</h2>
+        <div style="display:flex; width:100%; gap:5px; margin-bottom:10px;">
+            <button onclick="viewRankings('cake')" style="flex:1; cursor:pointer;">🍰</button>
+            <button onclick="viewRankings('pepper')" style="flex:1; cursor:pointer;">🌶️</button>
+            <button onclick="viewRankings('volcano')" style="flex:1; cursor:pointer;">🌋</button>
+        </div>
+        <div style="width:100%; overflow-y:auto; max-height:400px;">
+            <table id="rank-table">
+                <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Level</th><th>Date</th></tr></thead>
+                <tbody id="rank-list"></tbody>
+            </table>
+        </div>
+        <button class="btn btn-home" style="margin-top:15px;" onclick="showPage('home')">Home</button>
+    </div>
+
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <h2 id="pop-title">Time Up!</h2>
+            <p id="pop-stats"></p>
+            <div id="pop-mistake-summary" class="mistake-list"></div>
+            <button class="btn btn-submit" style="width:100%; margin-top: 15px;" onclick="goToResult()">Got it</button>
+        </div>
+    </div>
+
+    <footer>Copyright © 2026 Joyful Sprout. All rights reserved.</footer>
+</div>
+
+<script>
+    const firebaseConfig = {
+    	apiKey: "FIREBASE_API_KEY_PLACEHOLDER", 
+  	authDomain: "math-sprout-60.firebaseapp.com",
+  	projectId: "math-sprout-60",
+  	storageBucket: "math-sprout-60.firebasestorage.app",
+  	messagingSenderId: "792661788916",
+  	appId: "1:792661788916:web:d26ea26323cb3389ec76a1",
+  	measurementId: "G-J685B7LYYT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const MSG_LIB = {
+        god: { title: "What a Math God!", list: ["Are you a human calculator? That was incredible!", "Your brain is faster than a rocket ship! 🚀", "The Math King is here! Everyone, bow down!", "Did you just use magic? How are you so fast?", "You are 100% a math superhero!", "You finished that like a boss! No mistakes at all!", "Your brain must be made of super-gold!", "Is there a computer inside your head? Be honest!", "You just broke the world record in my heart!", "Your 'Math Tree' is so big, it’s touching the stars! ⭐"] },
+        prof: { title: "Hello, Professor Logic!", list: ["Hello, Professor! You know everything, don't you?", "You solved those like a pro! So smart!", "Your brain is working at 1000% speed today!", "Wow, you are the smartest kid in the universe!", "Logic Power! You found every answer so easily!", "I think you could teach the teacher today!", "You have a giant brain! It’s full of smart ideas.", "That was like a movie! A genius in action!", "Your math skills are totally sparkling! ✨", "Your sprout has grown into a strong, wise tree!"] },
+        doc: { title: "Doctor Calculation!", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your sprout is blooming into a beautiful flower! 🌸"] },
+        student: { title: "Oh, My Brilliant Student!", list: ["Great job, superstar! You’re getting so fast!", "You’re a math whiz! Keep it up!", "I can see your brain growing bigger and bigger!", "You're a star student! High five! 🖐️", "Way to go! You’re getting better every time!", "Your sprout is growing so fast! It's so green!", "You solved so many! You should be proud!", "Smarty pants! You made look like a piece of cake.", "Keep going! You're becoming a math master!", "Your little sprout just grew a new leaf! Yay! 🍃"] },
+        seed: { title: "Try again, you can do it better!", list: ["Thirsty Sprout! Give it more math water! 💧", "Oops! Your brain-battery is still charging! ⚡", "So close! One more try to pop a leaf! 🌱", "Math-Monkeys stole your score! Get it back! 🐒", "Nice try! Your brain is doing push-ups! 💪"] }
+    };
+
+    let currentDifficulty = '', timeLeft = 0, timerObj, score = 0, currentAns = 0, inputStr = "", isGameOver = false, isPlaying = false;
+    let usedQuestions = [];
+    let currentQuestionText = "";
+    let mistakeLog = {};
+    let answerTimeout = null; 
+
+    function showPage(id) {
+        isPlaying = (id === 'play');
+        const pages = document.querySelectorAll('.page');
+        pages.forEach(p => {
+            p.style.display = 'none';
+            p.classList.remove('active');
+        });
+        const target = document.getElementById('page-' + id);
+        if (target) {
+            target.style.display = 'flex';
+            target.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function initGame(mode) {
+        currentDifficulty = mode; score = 0; timeLeft = 60; inputStr = ""; isGameOver = false;
+        usedQuestions = []; mistakeLog = {};
+        if (answerTimeout) clearTimeout(answerTimeout);
+        document.getElementById('nickname').value = "";
+        document.getElementById('current-score').innerText = "0";
+        document.getElementById('timer').innerText = "60";
+        
+        const modeEmojis = { cake: "🍰", pepper: "🌶️", volcano: "🌋" };
+        document.getElementById('display-mode-emoji').innerText = modeEmojis[mode];
+
+        showPage('play'); genQuestion();
+        clearInterval(timerObj); timerObj = setInterval(tick, 1000);
+    }
+
+    function tick() {
+        if (!isPlaying || isGameOver) return;
+        timeLeft--; 
+        document.getElementById('timer').innerText = Math.max(0, timeLeft);
+        if (timeLeft <= 0) stopGame();
+    }
+
+    function genQuestion() {
+        let a, b, op = '+', qKey;
+        const qText = document.getElementById('q-text');
+        const pInput = document.getElementById('player-input');
+        document.getElementById('question-display').classList.remove('wrong'); 
+        inputStr = ""; pInput.innerText = ""; 
+        let attempts = 0;
+        do {
+            let r = Math.random();
+            if (currentDifficulty === 'cake') {
+                if (r < 0.5) { do { a = rand(1, 9); b = rand(1, 9); } while (a + b <= 10); currentAns = a + b; op = '+'; }
+                else { do { a = rand(11, 20); b = rand(1, 9); } while (a - b >= 10); currentAns = a - b; op = '-'; }
+            } else if (currentDifficulty === 'pepper') {
+                if (r < 0.5) { do { a = rand(11, 19); b = rand(1, 9); } while ((a % 10) + b < 10); currentAns = a + b; op = '+'; }
+                else { do { a = rand(11, 29); b = rand(1, 9); } while ((a % 10) >= b); currentAns = a - b; op = '-'; }
+            } else { 
+                if (r < 0.5) { do { a = rand(10, 80); b = rand(1, 19); } while ((a % 10) + (b % 10) < 10); currentAns = a + b; op = '+'; }
+                else { do { a = rand(20, 99); b = rand(1, 19); } while ((a % 10) >= (b % 10) || a <= b); currentAns = a - b; op = '-'; }
+            }
+            qKey = `${a}${op}${b}`;
+            attempts++;
+        } while (usedQuestions.includes(qKey) && attempts < 300);
+        usedQuestions.push(qKey);
+        currentQuestionText = `${a} ${op} ${b}`;
+        qText.innerText = currentQuestionText;
+    }
+
+    function handleInput(val) {
+        if (isGameOver || !isPlaying) return;
+        const pInput = document.getElementById('player-input');
+        if (answerTimeout) { clearTimeout(answerTimeout); answerTimeout = null; }
+        if (val === 'del') { 
+            inputStr = ""; 
+        } else if (inputStr.length < 5) { 
+            inputStr += val; 
+        }
+        pInput.innerText = inputStr; 
+        
+        const currentInputInt = parseInt(inputStr);
+        if (currentInputInt === currentAns) {
+            document.getElementById('question-display').classList.remove('wrong');
+            answerTimeout = setTimeout(checkAnswer, 300);
+        } else if (inputStr.length >= currentAns.toString().length) {
+            answerTimeout = setTimeout(checkAnswer, 5000); 
+        }
+    }
+
+    function checkAnswer() {
+        if (!isPlaying) return;
+        answerTimeout = null;
+        const pInput = document.getElementById('player-input');
+        const display = document.getElementById('question-display');
+        
+        if (parseInt(inputStr) === currentAns) { 
+            score++; 
+            document.getElementById('current-score').innerText = score; 
+            display.classList.remove('wrong');
+            genQuestion(); 
+        } else { 
+            mistakeLog[currentQuestionText] = (mistakeLog[currentQuestionText] || 0) + 1;
+            display.classList.add('wrong');
+            inputStr = ""; 
+            pInput.innerText = "";
+            setTimeout(() => display.classList.remove('wrong'), 300); 
+        }
+    }
+
+    function stopGame() {
+        isGameOver = true; isPlaying = false; clearInterval(timerObj);
+        if (answerTimeout) clearTimeout(answerTimeout);
+        const lv = getLvName(score);
+        document.getElementById('pop-title').innerText = lv;
+        document.getElementById('pop-stats').innerText = `Score : ${score}`;
+        let mText = "<b>Mistake Report</b><br>";
+        let keys = Object.keys(mistakeLog);
+        if(keys.length === 0) mText += "Perfect! No mistakes! 🌟";
+        else keys.forEach(k => { mText += `${k} (${mistakeLog[k]} times)<br>`; });
+        document.getElementById('pop-mistake-summary').innerHTML = mText;
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    async function goToResult() {
+        document.getElementById('modal-overlay').style.display = 'none';
+        showPage('result');
+        const lv = getLvName(score);
+        document.getElementById('res-lv-title').innerText = MSG_LIB[getMsgKey(lv)].title;
+        document.getElementById('res-score-msg').innerText = `You solved : ${score}`;
+        document.getElementById('res-random-msg').innerText = pick(MSG_LIB[getMsgKey(lv)].list);
+        document.getElementById('wrong-answer-report').innerHTML = document.getElementById('pop-mistake-summary').innerHTML;
+        const rankMsg = document.getElementById('res-rank-msg');
+        rankMsg.innerText = "Calculating rank...";
+        try {
+            const lastMon = new Date(); 
+            lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); 
+            lastMon.setHours(9,0,0,0);
+            const snap = await db.collection('rankings').doc(currentDifficulty).collection('players')
+                                .where('ts', '>=', lastMon.getTime())
+                                .get();
+            let allPlayers = [];
+            snap.forEach(doc => allPlayers.push(doc.data()));
+            allPlayers.sort((a,b) => b.score - a.score);
+            const rank = allPlayers.findIndex(p => p.score <= score) + 1;
+            rankMsg.innerText = rank > 0 ? `You are ranked at ${rank}${getOrdinalSuffix(rank)}` : "Welcome to the leaderboard!";
+        } catch (e) { rankMsg.innerText = ""; }
+        
+        document.getElementById('rank-submission').style.display = 'block'; 
+        document.getElementById('fail-actions').style.display = 'none';
+    }
+
+    function getOrdinalSuffix(i) {
+        var j = i % 10, k = i % 100;
+        if (j == 1 && k != 11) return "st";
+        if (j == 2 && k != 12) return "nd";
+        if (j == 3 && k != 13) return "rd";
+        return "th";
+    }
+
+    function getMsgKey(lv) {
+        const map = {'Math God':'god', 'Professor Logic':'prof', 'Doctor Calculation':'doc', 'Brilliant Student':'student', 'Seed Baby':'seed'};
+        return map[lv];
+    }
+
+    function getLvName(s) {
+        if (s >= 48) return "Math God";
+        if (s >= 36) return "Professor Logic";
+        if (s >= 20) return "Doctor Calculation";
+        if (s >= 12) return "Brilliant Student";
+        return "Seed Baby";
+    }
+
+    function getLevelClass(lv) {
+        if (lv === "Math God") return "lv-god";
+        if (lv === "Professor Logic") return "lv-prof";
+        if (lv === "Doctor Calculation") return "lv-doc";
+        if (lv === "Brilliant Student") return "lv-student";
+        if (lv === "Seed Baby") return "lv-seed";
+        return "";
+    }
+
+    function getLevelEmoji(lv) {
+        if (lv === "Math God") return "👑 Math God";
+        if (lv === "Professor Logic") return "🎓 Professor Logic";
+        if (lv === "Doctor Calculation") return "🩺 Doctor Calculation";
+        if (lv === "Brilliant Student") return "🌟 Brilliant Student";
+        if (lv === "Seed Baby") return "👶 Seed Baby";
+        return lv;
+    }
+
+    async function pushRank() {
+        const nickInput = document.getElementById('nickname');
+        const nick = nickInput.value.trim() || "Sprout";
+        const dateStr = new Date().toISOString().split('T')[0];
+        try {
+            await db.collection('rankings').doc(currentDifficulty).collection('players').add({
+                name: nick, score: score, lv: getLvName(score), date: dateStr, ts: Date.now()
+            });
+            const lastMon = new Date(); 
+            lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); 
+            lastMon.setHours(9,0,0,0);
+            const snap = await db.collection('rankings').doc(currentDifficulty).collection('players')
+                                .where('ts', '>=', lastMon.getTime())
+                                .get();
+            let players = [];
+            snap.forEach(doc => players.push(doc.data()));
+            players.sort((a, b) => b.score - a.score);
+            const rank = players.findIndex(p => p.name === nick && p.score === score) + 1;
+            alert(`You are ranked at ${rank}${getOrdinalSuffix(rank)}!`);
+            viewRankings(currentDifficulty);
+        } catch (e) { alert("Error saving score."); console.error(e); }
+    }
+
+    async function viewRankings(mode = 'cake') {
+        showPage('rank');
+        const labels = { cake: "🍰 Piece of Cake", pepper: "🌶️ Hot Pepper", volcano: "🌋 Spicy Volcano" };
+        document.getElementById('rank-mode-label').innerText = labels[mode] + " Ranking";
+        const lastMon = new Date(); lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); lastMon.setHours(9,0,0,0);
+        try {
+            const snap = await db.collection('rankings').doc(mode).collection('players').where('ts', '>=', lastMon.getTime()).get();
+            let rows = []; snap.forEach(doc => rows.push(doc.data())); rows.sort((a,b) => b.score - a.score);
+            const tbody = document.getElementById('rank-list');
+            tbody.innerHTML = rows.slice(0, 50).map((r, i) => `
+                <tr class="${getLevelClass(r.lv)}">
+                    <td>${i+1}</td>
+                    <td>${r.name}</td>
+                    <td>${r.score}</td>
+                    <td>${getLevelEmoji(r.lv)}</td>
+                    <td>${r.date}</td>
+                </tr>`).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
+        } catch (e) { console.error(e); }
+    }
+
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    window.addEventListener('keydown', (e) => { 
+        if (!isNaN(e.key)) handleInput(parseInt(e.key)); 
+        else if (e.key === 'Backspace' || e.key === 'Delete') handleInput('del'); 
+    });
+</script>
+</body>
+</html>
