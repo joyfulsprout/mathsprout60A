@@ -1,0 +1,24 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # 메인 브랜치에 푸시될 때 작동
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Replace API Key
+        run: |
+          # index.html 파일 안의 PLACEHOLDER 문구를 Secret 값으로 치환합니다.
+          sed -i "s/FIREBASE_API_KEY_PLACEHOLDER/${{ secrets.FIREBASE_API_KEY }}/g" index.html
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: . # 배포할 폴더 (현재 루트)
+          branch: gh-pages # 배포될 브랜치
