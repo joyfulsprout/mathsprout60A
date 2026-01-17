@@ -15,7 +15,7 @@ jobs:
       - name: Replace API Key
         run: |
           # index.html 파일 안의 PLACEHOLDER 문구를 Secret 값으로 치환합니다.
-          sed -i "s/FIREBASE_API_KEY_PLACEHOLDER/${{ secrets.FIREBASE_API_KEY }}/g" index.html
+          sed -i "s|FIREBASE_API_KEY_PLACEHOLDER/${{ secrets.FIREBASE_API_KEY }}/g" index.html
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
