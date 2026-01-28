@@ -449,22 +449,23 @@
         const nick = nickInput.value.trim() || "Sprout";
         const dateStr = new Date().toISOString().split('T')[0];
         try {
+            // 서버 저장 완료 대기
             await db.collection('rankings').doc(currentDifficulty).collection('players').add({
                 name: nick, score: score, lv: getLvName(score), date: dateStr, ts: Date.now()
             });
-            const lastMon = new Date(); 
-            lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); 
-            lastMon.setHours(9,0,0,0);
-            const snap = await db.collection('rankings').doc(currentDifficulty).collection('players')
-                                .where('ts', '>=', lastMon.getTime())
-                                .get();
-            let players = [];
-            snap.forEach(doc => players.push(doc.data()));
-            players.sort((a, b) => b.score - a.score);
-            const rank = players.findIndex(p => p.name === nick && p.score === score) + 1;
-            alert(`You are ranked at ${rank}${getOrdinalSuffix(rank)}!`);
+            
+            // 모바일 멈춤 방지를 위해 화면 전환 먼저 실행
             viewRankings(currentDifficulty);
-        } catch (e) { alert("Error saving score."); console.error(e); }
+            
+            // 약간의 시간차를 두고 알림창 표시
+            setTimeout(() => {
+                alert("Rank saved successfully!");
+            }, 100);
+            
+        } catch (e) { 
+            alert("Error saving score."); 
+            console.error(e); 
+        }
     }
 
     async function viewRankings(mode = 'cake') {
@@ -495,6 +496,4 @@
     });
 </script>
 </body>
-
 </html>
-
