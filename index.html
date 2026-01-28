@@ -82,7 +82,7 @@
 
         #question-display { 
             font-size: 44px; font-weight: 800; 
-            margin: 18px 0; 
+            margin: 10px 0; 
             min-height: 60px; 
             display: flex; align-items: center; justify-content: center;
             transition: color 0.2s; line-height: 1.2;
@@ -92,6 +92,34 @@
         #q-text { min-width: 160px; display: inline-block; text-align: right; padding-right: 15px; }
         #player-input { min-width: 80px; display: inline-block; text-align: left; color: var(--accent-blue); padding-left: 15px; }
         
+        #growth-zone {
+            width: 100%;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .growth-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            min-height: 48px;
+            width: 100%;
+        }
+        .growth-item {
+            transition: all 0.2s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            width: 26px;
+        }
+
         .wrong { color: var(--accent-red) !important; animation: shake 0.3s; }
 
         #keypad { 
@@ -104,6 +132,7 @@
         
         .key { padding: 18px; background: #f5f5f5; border: none; border-radius: 8px; font-size: 24px; font-weight: bold; cursor: pointer; color: var(--darkest-green); }
         .key-del { background: var(--soft-green); color: var(--darkest-green); font-size: 20px; border: none; }
+        .key-bs { background: #fdf2b1; font-weight: 900; font-size: 28px; color: var(--darkest-green); } 
 
         .mistake-list { 
             text-align: center; font-size: 14px; background: #fff5f5; 
@@ -165,6 +194,8 @@
             <span class="header-title-mode">🌱 Math Sprout <span id="display-mode-emoji"></span></span>
             <span class="header-timer">⏱️ <span id="timer">60</span>s</span>
         </div>
+
+        <div id="growth-zone"></div>
         
         <div id="question-display">
             <span id="q-text">Ready?</span><span>=</span><span id="player-input"></span>
@@ -174,9 +205,9 @@
             <button class="key" onclick="handleInput(1)">1</button><button class="key" onclick="handleInput(2)">2</button><button class="key" onclick="handleInput(3)">3</button>
             <button class="key" onclick="handleInput(4)">4</button><button class="key" onclick="handleInput(5)">5</button><button class="key" onclick="handleInput(6)">6</button>
             <button class="key" onclick="handleInput(7)">7</button><button class="key" onclick="handleInput(8)">8</button><button class="key" onclick="handleInput(9)">9</button>
-            <button class="key" style="visibility:hidden;"></button>
+            <button class="key key-bs" onclick="handleInput('del')">←</button> 
             <button class="key" onclick="handleInput(0)">0</button>
-            <button class="key key-del" onclick="handleInput('del')">DEL</button>
+            <button class="key key-del" onclick="handleInput('clear')">DEL</button>
         </div>
         <div style="display:flex; width:100%; margin-top:10px;">
             <button class="btn btn-home" style="flex:1" onclick="initGame(currentDifficulty)">🔄 Retry</button>
@@ -190,7 +221,6 @@
         <p id="res-random-msg" style="color: #555; margin: 10px; font-weight: 500;"></p>
         <p id="res-rank-msg" style="color: var(--accent-blue); font-weight: bold; font-size: 18px; margin: 5px;"></p>
         <div id="wrong-answer-report" class="mistake-list" style="margin-bottom: 15px;"></div>
-
         <div id="rank-submission" style="width: 100%;">
             <input type="text" id="nickname" placeholder="Nickname" maxlength="10" style="display: block; padding:15px; width:80%; border:1px solid #ddd; border-radius:10px; margin: 0 auto 15px auto; font-size:16px; text-align:center;">
             <div style="display:flex; gap:10px; justify-content:center;">
@@ -281,11 +311,9 @@
         document.getElementById('nickname').value = "";
         document.getElementById('current-score').innerText = "0";
         document.getElementById('timer').innerText = "60";
-        
         const modeEmojis = { cake: "🍰", pepper: "🌶️", volcano: "🌋" };
         document.getElementById('display-mode-emoji').innerText = modeEmojis[mode];
-
-        showPage('play'); genQuestion();
+        showPage('play'); updateGrowthZone(); genQuestion();
         clearInterval(timerObj); timerObj = setInterval(tick, 1000);
     }
 
@@ -307,13 +335,15 @@
             let r = Math.random();
             if (currentDifficulty === 'cake') {
                 if (r < 0.5) { do { a = rand(1, 9); b = rand(1, 9); } while (a + b <= 10); currentAns = a + b; op = '+'; }
-                else { do { a = rand(11, 20); b = rand(1, 9); } while (a - b >= 10); currentAns = a - b; op = '-'; }
-            } else if (currentDifficulty === 'pepper') {
-                if (r < 0.5) { do { a = rand(11, 19); b = rand(1, 9); } while ((a % 10) + b < 10); currentAns = a + b; op = '+'; }
-                else { do { a = rand(11, 29); b = rand(1, 9); } while ((a % 10) >= b); currentAns = a - b; op = '-'; }
-            } else { 
-                if (r < 0.5) { do { a = rand(10, 80); b = rand(1, 19); } while ((a % 10) + (b % 10) < 10); currentAns = a + b; op = '+'; }
-                else { do { a = rand(20, 99); b = rand(1, 19); } while ((a % 10) >= (b % 10) || a <= b); currentAns = a - b; op = '-'; }
+                else { do { a = rand(11, 18); b = rand(1, 9); } while (a - b >= 10); currentAns = a - b; op = '-'; }
+            } 
+            else if (currentDifficulty === 'pepper') {
+                if (r < 0.5) { do { a = rand(11, 89); b = rand(2, 9); } while ((a % 10) + b < 10); currentAns = a + b; op = '+'; }
+                else { do { a = rand(11, 89); b = rand(2, 9); } while ((a % 10) >= b); currentAns = a - b; op = '-'; }
+            } 
+            else { 
+                if (r < 0.5) { do { a = rand(11, 79); b = rand(11, 89-a); } while ((a % 10) + (b % 10) < 10); currentAns = a + b; op = '+'; }
+                else { do { a = rand(31, 98); b = rand(11, a-1); } while ((a % 10) >= (b % 10)); currentAns = a - b; op = '-'; }
             }
             qKey = `${a}${op}${b}`;
             attempts++;
@@ -327,13 +357,10 @@
         if (isGameOver || !isPlaying) return;
         const pInput = document.getElementById('player-input');
         if (answerTimeout) { clearTimeout(answerTimeout); answerTimeout = null; }
-        if (val === 'del') { 
-            inputStr = ""; 
-        } else if (inputStr.length < 5) { 
-            inputStr += val; 
-        }
+        if (val === 'clear') { inputStr = ""; } 
+        else if (val === 'del') { inputStr = inputStr.slice(0, -1); } 
+        else if (inputStr.length < 5) { inputStr += val; }
         pInput.innerText = inputStr; 
-        
         const currentInputInt = parseInt(inputStr);
         if (currentInputInt === currentAns) {
             document.getElementById('question-display').classList.remove('wrong');
@@ -346,26 +373,92 @@
     function checkAnswer() {
         if (!isPlaying) return;
         answerTimeout = null;
-        const pInput = document.getElementById('player-input');
-        const display = document.getElementById('question-display');
-        
         if (parseInt(inputStr) === currentAns) { 
             score++; 
             document.getElementById('current-score').innerText = score; 
-            display.classList.remove('wrong');
+            updateGrowthZone();
             genQuestion(); 
         } else { 
             mistakeLog[currentQuestionText] = (mistakeLog[currentQuestionText] || 0) + 1;
-            display.classList.add('wrong');
-            inputStr = ""; 
-            pInput.innerText = "";
-            setTimeout(() => display.classList.remove('wrong'), 300); 
+            document.getElementById('question-display').classList.add('wrong');
+            inputStr = ""; document.getElementById('player-input').innerText = "";
+            setTimeout(() => document.getElementById('question-display').classList.remove('wrong'), 300); 
         }
+    }
+
+    function updateGrowthZone() {
+        const zone = document.getElementById('growth-zone');
+        zone.innerHTML = '';
+        let row1 = document.createElement('div'); row1.className = 'growth-row';
+        let row2 = document.createElement('div'); row2.className = 'growth-row';
+
+        if (score <= 11) {
+            if (score >= 1) row2.innerHTML = '<div class="growth-item" style="font-size:24px;">🌰</div>';
+            if (score >= 4) row1.innerHTML = '<div class="growth-item" style="font-size:24px; margin-right:40px;">☀️</div>';
+            if (score >= 7) row1.innerHTML += '<div class="growth-item" style="font-size:24px;">🚿</div>';
+        } 
+        else if (score <= 19) {
+            let size = (score >= 14) ? 24 + (score - 13) : 24;
+            row2.innerHTML = `<div class="growth-item" style="font-size:${size}px;">🌱</div>`;
+        }
+        else if (score <= 25) {
+            // 20~25개 구간: 1개 맞출 때마다 2pt씩 증가 (30 + (score-20)*2)
+            // 25개 달성 시 최종 크기: 30 + 10 = 40px
+            let size = 30 + (score - 20) * 2;
+            row2.innerHTML = `<div class="growth-item" style="font-size:${size}px;">🌳</div>`;
+        }
+        else {
+            // 26개 이상: 나무 크기 40px로 고정
+            let treeSize = 40; 
+            let decoCount = score - 25; 
+            let icons = [];
+
+            for (let i = 1; i <= decoCount; i++) {
+                let icon = '🌼';
+                if (i % 2 === 1) icons.push(icon); else icons.unshift(icon);
+            }
+
+            let line1Icons = icons.slice(0, 10);
+            let line2Icons = icons.slice(10);
+            
+            let slots = new Array(11).fill(null);
+            slots[5] = '🌳'; 
+
+            let leftIdx = 4;
+            let rightIdx = 6;
+            for(let k=0; k < line1Icons.length; k++) {
+                if(k % 2 === 0) {
+                    if(rightIdx <= 10) slots[rightIdx++] = line1Icons[k];
+                } else {
+                    if(leftIdx >= 0) slots[leftIdx--] = line1Icons[k];
+                }
+            }
+
+            slots.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'growth-item';
+                if (item) {
+                    div.innerText = item;
+                    div.style.fontSize = (item === '🌳') ? treeSize + 'px' : '24px';
+                }
+                row2.appendChild(div);
+            });
+
+            if (line2Icons.length > 0) {
+                line2Icons.forEach(item => {
+                    let div = document.createElement('div');
+                    div.className = 'growth-item';
+                    div.innerText = item;
+                    div.style.fontSize = '24px';
+                    row1.appendChild(div);
+                });
+            }
+        }
+        zone.appendChild(row1); zone.appendChild(row2);
     }
 
     function stopGame() {
         isGameOver = true; isPlaying = false; clearInterval(timerObj);
-        if (answerTimeout) clearTimeout(answerTimeout);
         const lv = getLvName(score);
         document.getElementById('pop-title').innerText = lv;
         document.getElementById('pop-stats').innerText = `Score : ${score}`;
@@ -388,21 +481,12 @@
         const rankMsg = document.getElementById('res-rank-msg');
         rankMsg.innerText = "Calculating rank...";
         try {
-            const lastMon = new Date(); 
-            lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); 
-            lastMon.setHours(9,0,0,0);
-            const snap = await db.collection('rankings').doc(currentDifficulty).collection('players')
-                                .where('ts', '>=', lastMon.getTime())
-                                .get();
-            let allPlayers = [];
-            snap.forEach(doc => allPlayers.push(doc.data()));
-            allPlayers.sort((a,b) => b.score - a.score);
+            const lastMon = new Date(); lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); lastMon.setHours(9,0,0,0);
+            const snap = await db.collection('rankings').doc(currentDifficulty).collection('players').where('ts', '>=', lastMon.getTime()).get();
+            let allPlayers = []; snap.forEach(doc => allPlayers.push(doc.data())); allPlayers.sort((a,b) => b.score - a.score);
             const rank = allPlayers.findIndex(p => p.score <= score) + 1;
             rankMsg.innerText = rank > 0 ? `You are ranked at ${rank}${getOrdinalSuffix(rank)}` : "Welcome to the leaderboard!";
         } catch (e) { rankMsg.innerText = ""; }
-        
-        document.getElementById('rank-submission').style.display = 'block'; 
-        document.getElementById('fail-actions').style.display = 'none';
     }
 
     function getOrdinalSuffix(i) {
@@ -412,60 +496,24 @@
         if (j == 3 && k != 13) return "rd";
         return "th";
     }
-
-    function getMsgKey(lv) {
-        const map = {'Math God':'god', 'Professor Logic':'prof', 'Doctor Calculation':'doc', 'Brilliant Student':'student', 'Seed Baby':'seed'};
-        return map[lv];
-    }
-
+    function getMsgKey(lv) { return {'Math God':'god', 'Professor Logic':'prof', 'Doctor Calculation':'doc', 'Brilliant Student':'student', 'Seed Baby':'seed'}[lv]; }
     function getLvName(s) {
-        if (s >= 48) return "Math God";
-        if (s >= 36) return "Professor Logic";
-        if (s >= 20) return "Doctor Calculation";
-        if (s >= 12) return "Brilliant Student";
+        if (s >= 48) return "Math God"; if (s >= 36) return "Professor Logic";
+        if (s >= 20) return "Doctor Calculation"; if (s >= 12) return "Brilliant Student";
         return "Seed Baby";
     }
-
-    function getLevelClass(lv) {
-        if (lv === "Math God") return "lv-god";
-        if (lv === "Professor Logic") return "lv-prof";
-        if (lv === "Doctor Calculation") return "lv-doc";
-        if (lv === "Brilliant Student") return "lv-student";
-        if (lv === "Seed Baby") return "lv-seed";
-        return "";
-    }
-
-    function getLevelEmoji(lv) {
-        if (lv === "Math God") return "👑 Math God";
-        if (lv === "Professor Logic") return "🎓 Professor Logic";
-        if (lv === "Doctor Calculation") return "🩺 Doctor Calculation";
-        if (lv === "Brilliant Student") return "🌟 Brilliant Student";
-        if (lv === "Seed Baby") return "👶 Seed Baby";
-        return lv;
-    }
+    function getLevelClass(lv) { return {'Math God':'lv-god', 'Professor Logic':'lv-prof', 'Doctor Calculation':'lv-doc', 'Brilliant Student':'lv-student', 'Seed Baby':'lv-seed'}[lv] || ""; }
+    function getLevelEmoji(lv) { return {'Math God':'👑 Math God', 'Professor Logic':'🎓 Professor Logic', 'Doctor Calculation':'🩺 Doctor Calculation', 'Brilliant Student':'🌟 Brilliant Student', 'Seed Baby':'👶 Seed Baby'}[lv] || lv; }
 
     async function pushRank() {
         const nickInput = document.getElementById('nickname');
         const nick = nickInput.value.trim() || "Sprout";
         const dateStr = new Date().toISOString().split('T')[0];
         try {
-            // 서버 저장 완료 대기
-            await db.collection('rankings').doc(currentDifficulty).collection('players').add({
-                name: nick, score: score, lv: getLvName(score), date: dateStr, ts: Date.now()
-            });
-            
-            // 모바일 멈춤 방지를 위해 화면 전환 먼저 실행
+            await db.collection('rankings').doc(currentDifficulty).collection('players').add({ name: nick, score: score, lv: getLvName(score), date: dateStr, ts: Date.now() });
             viewRankings(currentDifficulty);
-            
-            // 약간의 시간차를 두고 알림창 표시
-            setTimeout(() => {
-                alert("Rank saved successfully!");
-            }, 100);
-            
-        } catch (e) { 
-            alert("Error saving score."); 
-            console.error(e); 
-        }
+            setTimeout(() => { alert("Rank saved successfully!"); }, 100);
+        } catch (e) { alert("Error saving score."); console.error(e); }
     }
 
     async function viewRankings(mode = 'cake') {
@@ -477,17 +525,9 @@
             const snap = await db.collection('rankings').doc(mode).collection('players').where('ts', '>=', lastMon.getTime()).get();
             let rows = []; snap.forEach(doc => rows.push(doc.data())); rows.sort((a,b) => b.score - a.score);
             const tbody = document.getElementById('rank-list');
-            tbody.innerHTML = rows.slice(0, 50).map((r, i) => `
-                <tr class="${getLevelClass(r.lv)}">
-                    <td>${i+1}</td>
-                    <td>${r.name}</td>
-                    <td>${r.score}</td>
-                    <td>${getLevelEmoji(r.lv)}</td>
-                    <td>${r.date}</td>
-                </tr>`).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
+            tbody.innerHTML = rows.slice(0, 50).map((r, i) => `<tr class="${getLevelClass(r.lv)}"><td>${i+1}</td><td>${r.name}</td><td>${r.score}</td><td>${getLevelEmoji(r.lv)}</td><td>${r.date}</td></tr>`).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
         } catch (e) { console.error(e); }
     }
-
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     window.addEventListener('keydown', (e) => { 
