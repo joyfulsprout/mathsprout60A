@@ -100,7 +100,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 5px;
-            overflow: visible; /* 물방울이 튀어나오도록 변경 */
+            overflow: visible !important; /* 물방울이 튀어나오도록 변경 */
             pointer-events: none;
             position: relative; 
         }
@@ -126,7 +126,7 @@
         .water-drop {
             position: absolute;
             font-size: 10px;
-            z-index: 99;
+            z-index: 999;
             pointer-events: none;
             animation: dropAnim 0.7s ease-out forwards;
         }
