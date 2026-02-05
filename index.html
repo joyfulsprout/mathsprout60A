@@ -272,6 +272,14 @@
                 <tbody id="rank-list"></tbody>
             </table>
         </div>
+        <div class="home-info" style="width: 100%; box-sizing: border-box;">
+            <b>[Level System]</b><br>
+            - 👑 Math God: 48+ problems<br>
+            - 🎓 Professor Logic: 36 - 47<br>
+            - 🩺 Doctor Calculation: 20 - 35<br>
+            - 🌟 Brilliant Student: 12 - 19<br>
+            - 👶 Seed Baby: Under 12
+        </div>
         <button class="btn btn-home" style="margin-top:15px;" onclick="showPage('home')">Home</button>
     </div>
 
@@ -395,7 +403,6 @@
         }
     }
 
-    // 물뿌리기 효과 로직 (가시성 개선)
     function triggerWatering() {
         const zone = document.getElementById('growth-zone');
         for (let i = 0; i < 6; i++) {
@@ -403,7 +410,6 @@
             drop.className = 'water-drop';
             drop.innerText = '💧';
             drop.style.left = Math.random() * 90 + 5 + '%';
-            // 애니메이션 속도 및 딜레이 무작위성 부여
             drop.style.animationDelay = Math.random() * 0.2 + 's';
             zone.appendChild(drop);
             setTimeout(() => drop.remove(), 800);
@@ -415,7 +421,7 @@
         answerTimeout = null;
         if (parseInt(inputStr) === currentAns) { 
             score++; 
-            triggerWatering(); // 정답 시 호출
+            triggerWatering(); 
             document.getElementById('current-score').innerText = score; 
             updateGrowthZone();
             genQuestion(); 
@@ -429,7 +435,6 @@
 
     function updateGrowthZone() {
         const zone = document.getElementById('growth-zone');
-        // 물방울 요소는 유지하기 위해 row들만 새로 그림
         const rows = zone.querySelectorAll('.growth-row');
         rows.forEach(r => r.remove());
         
@@ -544,7 +549,7 @@
         return "Seed Baby";
     }
     function getLevelClass(lv) { return {'Math God':'lv-god', 'Professor Logic':'lv-prof', 'Doctor Calculation':'lv-doc', 'Brilliant Student':'lv-student', 'Seed Baby':'lv-seed'}[lv] || ""; }
-    function getLevelEmoji(lv) { return {'Math God':'👑 Math God', 'Professor Logic':'🎓 Professor Logic', 'Doctor Calculation':'🩺 Doctor Calculation', 'Brilliant Student':'🌟 Brilliant Student', 'Seed Baby':'👶 Seed Baby'}[lv] || lv; }
+    function getLevelEmoji(lv) { return {'Math God':'👑', 'Professor Logic':'🎓', 'Doctor Calculation':'🩺', 'Brilliant Student':'🌟', 'Seed Baby':'👶'}[lv] || ""; }
 
     async function pushRank() {
         const nickInput = document.getElementById('nickname');
@@ -575,10 +580,11 @@
                 const speed = (r.score / 60).toFixed(2);
                 const d = new Date(r.ts || r.date);
                 const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+                const emoji = getLevelEmoji(r.lv);
                 
                 return `<tr class="${getLevelClass(r.lv)}">
                     <td>${i+1}</td>
-                    <td>${r.name}</td>
+                    <td>${emoji} ${r.name}</td>
                     <td>${r.score}</td>
                     <td>${speed}/s</td>
                     <td>${mmdd}</td>
