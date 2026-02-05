@@ -92,7 +92,7 @@
         #q-text { min-width: 160px; display: inline-block; text-align: right; padding-right: 15px; }
         #player-input { min-width: 80px; display: inline-block; text-align: left; color: var(--accent-blue); padding-left: 15px; }
         
-        #growth-zone {
+        #growth-zone, #res-growth-display {
             width: 100%;
             min-height: 120px;
             display: flex;
@@ -100,7 +100,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 5px;
-            overflow: visible !important; /* 물방울이 튀어나오도록 변경 */
+            overflow: visible !important; 
             pointer-events: none;
             position: relative; 
         }
@@ -122,7 +122,6 @@
             animation: twinkle 0.8s ease-in-out forwards; 
         }
 
-        /* 물뿌리기 시각 효과 스타일 */
         .water-drop {
             position: absolute;
             font-size: 10px;
@@ -130,11 +129,36 @@
             pointer-events: none;
             animation: dropAnim 0.7s ease-out forwards;
         }
-
         @keyframes dropAnim {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
             30% { transform: translateY(-30px) scale(1.2); opacity: 1; }
             100% { transform: translateY(20px) scale(1); opacity: 0; }
+        }
+
+        .fixed-sun {
+            position: absolute;
+            top: 10px;
+            font-size: 30px;
+            z-index: 998;
+            animation: sunPulse 0.8s ease-out forwards;
+        }
+        @keyframes sunPulse {
+            0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+            50% { transform: scale(1.3) rotate(0deg); opacity: 1; }
+            100% { transform: scale(1) rotate(10deg); opacity: 0; }
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 12px; 
+            z-index: 999;
+            pointer-events: none;
+            animation: sparkleAnim 0.6s ease-in-out forwards;
+        }
+        @keyframes sparkleAnim {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
         }
 
         @keyframes twinkle {
@@ -168,6 +192,13 @@
         .lv-doc { background-color: var(--color-doc) !important; }
         .lv-student { background-color: var(--color-student) !important; }
         .lv-seed { background-color: var(--color-seed) !important; }
+
+        /* 랭킹 강조 스타일 */
+        .my-rank-highlight { 
+            outline: 3px solid var(--accent-green); 
+            outline-offset: -3px;
+            font-weight: 900 !important;
+        }
 
         #modal-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
@@ -240,24 +271,26 @@
         </div>
     </div>
 
-    <div id="page-result" class="page">
-        <h2 id="res-lv-title">Level Name</h2>
-        <p id="res-score-msg" style="font-size: 20px; font-weight: bold; margin-bottom: 5px;"></p>
-        <p id="res-random-msg" style="color: #555; margin: 10px; font-weight: 500;"></p>
-        <p id="res-rank-msg" style="color: var(--accent-blue); font-weight: bold; font-size: 18px; margin: 5px;"></p>
-        <div id="wrong-answer-report" class="mistake-list" style="margin-bottom: 15px;"></div>
+<div id="page-result" class="page">
+    <h2 id="res-lv-title">Level Name</h2>
+    <p id="res-random-msg" style="color: #555; margin: 5px; font-weight: 500;"></p>
+    <div id="res-growth-display"></div>
+    <p id="res-score-msg" style="font-size: 20px; font-weight: bold; margin-bottom: 8px;"></p>
+    
+    <div class="home-info" style="width: 100%; margin-top: 10px; padding: 20px; box-sizing: border-box; text-align: center;">
+        <p style="color: #000000; font-weight: bold; margin: 0 0 5px 0;">Welcome to the leader board!</p>
+        <p id="res-rank-msg" style="color: #000033; font-weight: bold; font-size: 18px; margin: 0 0 15px 0; text-align: center;"></p>
         <div id="rank-submission" style="width: 100%;">
-            <input type="text" id="nickname" name="nickname" autocomplete="nickname" placeholder="Nickname" maxlength="10" style="display: block; padding:15px; width:80%; border:1px solid #ddd; border-radius:10px; margin: 0 auto 15px auto; font-size:16px; text-align:center;">
+            <input type="text" id="nickname" name="nickname" autocomplete="nickname" placeholder="Nickname" maxlength="10" 
+                   style="display: block; padding:15px; width:85%; border:1px solid #ddd; border-radius:10px; margin: 0 auto 15px auto; font-size:16px; text-align:center; background: white;">
+            
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="btn btn-submit" style="margin:0; flex:1;" onclick="pushRank()">Submit</button>
                 <button class="btn btn-home" style="margin:0; flex:1;" onclick="showPage('home')">Home</button>
             </div>
         </div>
-        <div id="fail-actions" style="width: 100%; display:none;">
-            <button class="btn btn-pepper" onclick="initGame(currentDifficulty)">Retry</button>
-            <button class="btn btn-home" onclick="showPage('home')">Home</button>
-        </div>
     </div>
+</div>
 
     <div id="page-rank" class="page">
         <h2 id="rank-mode-label">Ranking</h2>
@@ -266,7 +299,7 @@
             <button id="btn-rank-pepper" class="rank-tab-btn" onclick="viewRankings('pepper')">🌶️</button>
             <button id="btn-rank-volcano" class="rank-tab-btn" onclick="viewRankings('volcano')">🌋</button>
         </div>
-        <div style="width:100%; overflow-y:auto; max-height:400px;">
+        <div id="rank-scroll-container" style="width:100%; overflow-y:auto; max-height:280px; scroll-behavior: smooth; border: 1px solid #eee; border-radius: 8px;">
             <table id="rank-table">
                 <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Speed</th><th>Date</th></tr></thead>
                 <tbody id="rank-list"></tbody>
@@ -287,7 +320,6 @@
         <div id="modal-content">
             <h2 id="pop-title">Time Up!</h2>
             <p id="pop-stats"></p>
-            <div id="pop-mistake-summary" class="mistake-list"></div>
             <button class="btn btn-submit" style="width:100%; margin-top: 15px;" onclick="goToResult()">Got it</button>
         </div>
     </div>
@@ -309,11 +341,11 @@
     const db = firebase.firestore();
 
     const MSG_LIB = {
-        god: { title: "What a Math God!", list: ["Are you a human calculator? That was incredible!", "Your brain is faster than a rocket ship! 🚀", "The Math King is here! Everyone, bow down!", "Did you just use magic? How are you so fast?", "You are 100% a math superhero!", "You finished that like a boss! No mistakes at all!", "Your brain must be made of super-gold!", "Is there a computer inside your head? Be honest!", "You just broke the world record in my heart!", "Your 'Math Tree' is so big, it’s touching the stars! ⭐"] },
-        prof: { title: "Hello, Professor Logic!", list: ["Hello, Professor! You know everything, don't you?", "You solved those like a pro! So smart!", "Your brain is working at 1000% speed today!", "Wow, you are the smartest kid in the universe!", "Logic Power! You found every answer so easily!", "I think you could teach the teacher today!", "You have a giant brain! It’s full of smart ideas.", "That was like a movie! A genius in action!", "Your math skills are totally sparkling! ✨", "Your sprout has grown into a strong, wise tree!"] },
-        doc: { title: "Doctor Calculation!", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your sprout is blooming into a beautiful flower! 🌸"] },
-        student: { title: "Oh, My Brilliant Student!", list: ["Great job, superstar! You’re getting so fast!", "You’re a math whiz! Keep it up!", "I can see your brain growing bigger and bigger!", "You're a star student! High five! 🖐️", "Way to go! You’re getting better every time!", "Your sprout is growing so fast! It's so green!", "You solved so many! You should be proud!", "Smarty pants! You made look like a piece of cake.", "Keep going! You're becoming a math master!", "Your little sprout just grew a new leaf! Yay! 🍃"] },
-        seed: { title: "Try again, you can do it better!", list: ["Thirsty Sprout! Give it more math water! 💧", "Oops! Your brain-battery is still charging! ⚡", "So close! One more try to pop a leaf! 🌱", "Math-Monkeys stole your score! Get it back! 🐒", "Nice try! Your brain is doing push-ups! 💪"] }
+        god: { title: "Math God", list: ["Are you a human calculator? That was incredible!", "Your brain is faster than a rocket ship! 🚀", "The Math King is here! Everyone, bow down!", "Did you just use magic? How are you so fast?", "You are 100% a math superhero!", "You finished that like a boss! No mistakes at all!", "Your brain must be made of super-gold!", "Is there a computer inside your head? Be honest!", "You just broke the world record in my heart!", "Your 'Math Tree' is so big, it’s touching the stars! ⭐"] },
+        prof: { title: "Professor Logic", list: ["Hello, Professor! You know everything, don't you?", "You solved those like a pro! So smart!", "Your brain is working at 1000% speed today!", "Wow, you are the smartest kid in the universe!", "Logic Power! You found every answer so easily!", "I think you could teach the teacher today!", "You have a giant brain! It’s full of smart ideas.", "That was like a movie! A genius in action!", "Your math skills are totally sparkling! ✨", "Your sprout has grown into a strong, wise tree!"] },
+        doc: { title: "Doctor Calculation", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your sprout is blooming into a beautiful flower! 🌸"] },
+        student: { title: "Brilliant Student", list: ["Great job, superstar! You’re getting so fast!", "You’re a math whiz! Keep it up!", "I can see your brain growing bigger and bigger!", "You're a star student! High five! 🖐️", "Way to go! You’re getting better every time!", "Your sprout is growing so fast! It's so green!", "You solved so many! You should be proud!", "Smarty pants! You made look like a piece of cake.", "Keep going! You're becoming a math master!", "Your little sprout just grew a new leaf! Yay! 🍃"] },
+        seed: { title: "Seed Baby", list: ["Thirsty Sprout! Give it more math water! 💧", "Oops! Your brain-battery is still charging! ⚡", "So close! One more try to pop a leaf! 🌱", "Math-Monkeys stole your score! Get it back! 🐒", "Nice try! Your brain is doing push-ups! 💪"] }
     };
 
     let currentDifficulty = '', timeLeft = 0, timerObj, score = 0, currentAns = 0, inputStr = "", isGameOver = false, isPlaying = false;
@@ -321,6 +353,7 @@
     let currentQuestionText = "";
     let mistakeLog = {};
     let answerTimeout = null; 
+    let lastPushedScore = -1; // 방금 달성한 점수 추적용
 
     function showPage(id) {
         isPlaying = (id === 'play');
@@ -339,7 +372,7 @@
 
     function initGame(mode) {
         currentDifficulty = mode; score = 0; timeLeft = 60; inputStr = ""; isGameOver = false;
-        usedQuestions = []; mistakeLog = {};
+        usedQuestions = []; mistakeLog = {}; lastPushedScore = -1;
         if (answerTimeout) clearTimeout(answerTimeout);
         document.getElementById('nickname').value = "";
         document.getElementById('current-score').innerText = "0";
@@ -410,9 +443,29 @@
             drop.className = 'water-drop';
             drop.innerText = '💧';
             drop.style.left = Math.random() * 90 + 5 + '%';
-            drop.style.animationDelay = Math.random() * 0.2 + 's';
             zone.appendChild(drop);
             setTimeout(() => drop.remove(), 800);
+        }
+    }
+
+    function triggerSunlight() {
+        const zone = document.getElementById('growth-zone');
+        const step = (score % 5 === 0) ? 4 : (score % 5);
+        const sunPos = 15 + (step - 1) * 20;
+        const sun = document.createElement('div');
+        sun.className = 'fixed-sun';
+        sun.innerText = '☀️';
+        sun.style.left = sunPos + '%';
+        zone.appendChild(sun);
+        setTimeout(() => sun.remove(), 800);
+        for (let i = 0; i < 8; i++) {
+            const spk = document.createElement('div');
+            spk.className = 'sparkle';
+            spk.innerText = '✨';
+            spk.style.left = Math.random() * 90 + 5 + '%';
+            spk.style.top = Math.random() * 80 + 10 + '%';
+            zone.appendChild(spk);
+            setTimeout(() => spk.remove(), 600);
         }
     }
 
@@ -421,7 +474,7 @@
         answerTimeout = null;
         if (parseInt(inputStr) === currentAns) { 
             score++; 
-            triggerWatering(); 
+            if (score % 5 === 0) { triggerWatering(); } else { triggerSunlight(); }
             document.getElementById('current-score').innerText = score; 
             updateGrowthZone();
             genQuestion(); 
@@ -437,14 +490,13 @@
         const zone = document.getElementById('growth-zone');
         const rows = zone.querySelectorAll('.growth-row');
         rows.forEach(r => r.remove());
-        
         let row1 = document.createElement('div'); row1.className = 'growth-row';
         let row2 = document.createElement('div'); row2.className = 'growth-row';
-
         if (score <= 11) {
-            if (score >= 1) row2.innerHTML = '<div class="growth-item" style="font-size:24px;">🌰</div>';
-            if (score >= 4) row1.innerHTML = '<div class="growth-item" style="font-size:24px; margin-right:40px;">☀️</div>';
-            if (score >= 7) row1.innerHTML += '<div class="growth-item" style="font-size:24px;">🚿</div>';
+            if (score >= 1) {
+                let seedSize = 12 + (score * 2);
+                row2.innerHTML = `<div class="growth-item" style="font-size:${seedSize}px;">🌰</div>`;
+            }
         } 
         else if (score <= 19) {
             let size = (score >= 14) ? 24 + (score - 13) : 24;
@@ -458,28 +510,19 @@
             let treeSize = 40; 
             let decoCount = score - 25; 
             let icons = [];
-
             for (let i = 1; i <= decoCount; i++) {
                 let icon = '🌼';
                 if (i % 2 === 1) icons.push(icon); else icons.unshift(icon);
             }
-
             let line1Icons = icons.slice(0, 10);
-            let line2Icons = icons.slice(10);
-            
             let slots = new Array(11).fill(null);
             slots[5] = '🌳'; 
-
             let leftIdx = 4;
             let rightIdx = 6;
             for(let k=0; k < line1Icons.length; k++) {
-                if(k % 2 === 0) {
-                    if(rightIdx <= 10) slots[rightIdx++] = line1Icons[k];
-                } else {
-                    if(leftIdx >= 0) slots[leftIdx--] = line1Icons[k];
-                }
+                if(k % 2 === 0) { if(rightIdx <= 10) slots[rightIdx++] = line1Icons[k]; }
+                else { if(leftIdx >= 0) slots[leftIdx--] = line1Icons[k]; }
             }
-
             slots.forEach(item => {
                 let div = document.createElement('div');
                 div.className = 'growth-item';
@@ -489,7 +532,7 @@
                 }
                 row2.appendChild(div);
             });
-
+            let line2Icons = icons.slice(10);
             if (line2Icons.length > 0) {
                 line2Icons.forEach(item => {
                     let div = document.createElement('div');
@@ -508,11 +551,6 @@
         const lv = getLvName(score);
         document.getElementById('pop-title').innerText = lv;
         document.getElementById('pop-stats').innerText = `Score : ${score}`;
-        let mText = "<b>Mistake Report</b><br>";
-        let keys = Object.keys(mistakeLog);
-        if(keys.length === 0) mText += "Perfect! No mistakes! 🌟";
-        else keys.forEach(k => { mText += `${k} (${mistakeLog[k]} times)<br>`; });
-        document.getElementById('pop-mistake-summary').innerHTML = mText;
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
@@ -520,10 +558,19 @@
         document.getElementById('modal-overlay').style.display = 'none';
         showPage('result');
         const lv = getLvName(score);
-        document.getElementById('res-lv-title').innerText = MSG_LIB[getMsgKey(lv)].title;
-        document.getElementById('res-score-msg').innerText = `You solved : ${score}`;
+        const emoji = getLevelOnlyEmoji(lv);
+        
+        document.getElementById('res-lv-title').innerText = `${emoji} ${MSG_LIB[getMsgKey(lv)].title}`;
         document.getElementById('res-random-msg').innerText = pick(MSG_LIB[getMsgKey(lv)].list);
-        document.getElementById('wrong-answer-report').innerHTML = document.getElementById('pop-mistake-summary').innerHTML;
+        
+        const zone = document.getElementById('growth-zone');
+        const rows = zone.querySelectorAll('.growth-row');
+        const displayBox = document.getElementById('res-growth-display');
+        displayBox.innerHTML = "";
+        rows.forEach(r => displayBox.appendChild(r.cloneNode(true)));
+
+        document.getElementById('res-score-msg').innerText = `You solved : ${score}`;
+
         const rankMsg = document.getElementById('res-rank-msg');
         rankMsg.innerText = "Calculating rank...";
         try {
@@ -548,6 +595,7 @@
         if (s >= 20) return "Doctor Calculation"; if (s >= 12) return "Brilliant Student";
         return "Seed Baby";
     }
+    function getLevelOnlyEmoji(lv) { return {'Math God':'👑', 'Professor Logic':'🎓', 'Doctor Calculation':'🩺', 'Brilliant Student':'🌟', 'Seed Baby':'👶'}[lv] || ""; }
     function getLevelClass(lv) { return {'Math God':'lv-god', 'Professor Logic':'lv-prof', 'Doctor Calculation':'lv-doc', 'Brilliant Student':'lv-student', 'Seed Baby':'lv-seed'}[lv] || ""; }
     function getLevelEmoji(lv) { return {'Math God':'👑', 'Professor Logic':'🎓', 'Doctor Calculation':'🩺', 'Brilliant Student':'🌟', 'Seed Baby':'👶'}[lv] || ""; }
 
@@ -555,6 +603,7 @@
         const nickInput = document.getElementById('nickname');
         const nick = nickInput.value.trim() || "Sprout";
         const dateStr = new Date().toISOString().split('T')[0];
+        lastPushedScore = score; // 순위 강조용 저장
         try {
             await db.collection('rankings').doc(currentDifficulty).collection('players').add({ name: nick, score: score, lv: getLvName(score), date: dateStr, ts: Date.now() });
             viewRankings(currentDifficulty);
@@ -566,23 +615,24 @@
         showPage('rank');
         const labels = { cake: "🍰 Piece of Cake", pepper: "🌶️ Hot Pepper", volcano: "🌋 Spicy Volcano" };
         document.getElementById('rank-mode-label').innerText = labels[mode] + " Ranking";
-        
         document.querySelectorAll('.rank-tab-btn').forEach(btn => btn.classList.remove('active-mode'));
         document.getElementById(`btn-rank-${mode}`).classList.add('active-mode');
-
         const lastMon = new Date(); lastMon.setDate(lastMon.getDate() - (lastMon.getDay() === 0 ? 6 : lastMon.getDay() - 1)); lastMon.setHours(9,0,0,0);
         try {
             const snap = await db.collection('rankings').doc(mode).collection('players').where('ts', '>=', lastMon.getTime()).get();
             let rows = []; snap.forEach(doc => rows.push(doc.data())); rows.sort((a,b) => b.score - a.score);
             const tbody = document.getElementById('rank-list');
-            
             tbody.innerHTML = rows.slice(0, 50).map((r, i) => {
                 const speed = (r.score / 60).toFixed(2);
                 const d = new Date(r.ts || r.date);
                 const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
                 const emoji = getLevelEmoji(r.lv);
-                
-                return `<tr class="${getLevelClass(r.lv)}">
+                // 내 점수 강조용 ID 부여 및 클래스 추가
+                const isMyCurrent = (r.score === lastPushedScore);
+                const rowIdAttr = isMyCurrent ? 'id="my-current-row"' : '';
+                const highlightClass = isMyCurrent ? 'my-rank-highlight' : '';
+
+                return `<tr ${rowIdAttr} class="${getLevelClass(r.lv)} ${highlightClass}">
                     <td>${i+1}</td>
                     <td>${emoji} ${r.name}</td>
                     <td>${r.score}</td>
@@ -590,6 +640,18 @@
                     <td>${mmdd}</td>
                 </tr>`;
             }).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
+
+            // 스크롤 처리
+            setTimeout(() => {
+                const myRow = document.getElementById('my-current-row');
+                const container = document.getElementById('rank-scroll-container');
+                if (myRow && container) {
+                    const rowPos = myRow.offsetTop;
+                    const containerHeight = container.offsetHeight;
+                    container.scrollTop = rowPos - (containerHeight / 2);
+                }
+            }, 100);
+
         } catch (e) { console.error(e); }
     }
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
