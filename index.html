@@ -193,9 +193,9 @@
         .lv-student { background-color: var(--color-student) !important; }
         .lv-seed { background-color: var(--color-seed) !important; }
 
-        /* 랭킹 강조 스타일 */
+        /* 랭킹 강조 스타일 수정 (색상: FFCC99) */
         .my-rank-highlight { 
-            outline: 3px solid var(--accent-green); 
+            outline: 3px solid #FFCC99; 
             outline-offset: -3px;
             font-weight: 900 !important;
         }
@@ -353,7 +353,7 @@
     let currentQuestionText = "";
     let mistakeLog = {};
     let answerTimeout = null; 
-    let lastPushedScore = -1; // 방금 달성한 점수 추적용
+    let lastPushTs = 0; // 방금 등록한 데이터의 타임스탬프를 정확히 저장
 
     function showPage(id) {
         isPlaying = (id === 'play');
@@ -372,7 +372,7 @@
 
     function initGame(mode) {
         currentDifficulty = mode; score = 0; timeLeft = 60; inputStr = ""; isGameOver = false;
-        usedQuestions = []; mistakeLog = {}; lastPushedScore = -1;
+        usedQuestions = []; mistakeLog = {}; lastPushTs = 0;
         if (answerTimeout) clearTimeout(answerTimeout);
         document.getElementById('nickname').value = "";
         document.getElementById('current-score').innerText = "0";
@@ -603,9 +603,10 @@
         const nickInput = document.getElementById('nickname');
         const nick = nickInput.value.trim() || "Sprout";
         const dateStr = new Date().toISOString().split('T')[0];
-        lastPushedScore = score; // 순위 강조용 저장
+        const nowTs = Date.now();
+        lastPushTs = nowTs; // 이번 기록의 유일한 타임스탬프 저장
         try {
-            await db.collection('rankings').doc(currentDifficulty).collection('players').add({ name: nick, score: score, lv: getLvName(score), date: dateStr, ts: Date.now() });
+            await db.collection('rankings').doc(currentDifficulty).collection('players').add({ name: nick, score: score, lv: getLvName(score), date: dateStr, ts: nowTs });
             viewRankings(currentDifficulty);
             setTimeout(() => { alert("Rank saved successfully!"); }, 100);
         } catch (e) { alert("Error saving score."); console.error(e); }
@@ -627,10 +628,11 @@
                 const d = new Date(r.ts || r.date);
                 const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
                 const emoji = getLevelEmoji(r.lv);
-                // 내 점수 강조용 ID 부여 및 클래스 추가
-                const isMyCurrent = (r.score === lastPushedScore);
-                const rowIdAttr = isMyCurrent ? 'id="my-current-row"' : '';
-                const highlightClass = isMyCurrent ? 'my-rank-highlight' : '';
+                
+                // 타임스탬프(ts)가 일치하는 단 하나의 행만 강조
+                const isExactlyMyRecord = (r.ts === lastPushTs);
+                const rowIdAttr = isExactlyMyRecord ? 'id="my-current-row"' : '';
+                const highlightClass = isExactlyMyRecord ? 'my-rank-highlight' : '';
 
                 return `<tr ${rowIdAttr} class="${getLevelClass(r.lv)} ${highlightClass}">
                     <td>${i+1}</td>
@@ -641,7 +643,6 @@
                 </tr>`;
             }).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
 
-            // 스크롤 처리
             setTimeout(() => {
                 const myRow = document.getElementById('my-current-row');
                 const container = document.getElementById('rank-scroll-container');
