@@ -166,6 +166,29 @@
             50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(255,223,0,0.8)); }
         }
 
+        /* Fireworks Confetti Animation */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            z-index: 1000;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+        @keyframes confettiBurst {
+            0% { 
+                transform: translate(0, 0) scale(1); 
+                opacity: 1; 
+            }
+            30% {
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); 
+                opacity: 0; 
+            }
+        }
+
         .wrong { color: var(--accent-red) !important; animation: shake 0.3s; }
 
         #keypad { 
@@ -193,7 +216,6 @@
         .lv-student { background-color: var(--color-student) !important; }
         .lv-seed { background-color: var(--color-seed) !important; }
 
-        /* 랭킹 강조 스타일 수정 (색상: FFCC99) */
         .my-rank-highlight { 
             outline: 3px solid #FFCC99; 
             outline-offset: -3px;
@@ -353,7 +375,7 @@
     let currentQuestionText = "";
     let mistakeLog = {};
     let answerTimeout = null; 
-    let lastPushTs = 0; // 방금 등록한 데이터의 타임스탬프를 정확히 저장
+    let lastPushTs = 0; 
 
     function showPage(id) {
         isPlaying = (id === 'play');
@@ -469,11 +491,53 @@
         }
     }
 
+    // Updated Firework Confetti Function
+    function triggerConfetti() {
+        const zone = document.getElementById('growth-zone');
+        const colors = ['#FFD700', '#FF6347', '#00FF7F', '#1E90FF', '#FF69B4', '#FFA500'];
+        const numConfetti = 40;
+        
+        // Burst from the center of the growth zone
+        for (let i = 0; i < numConfetti; i++) {
+            const conf = document.createElement('div');
+            conf.className = 'confetti';
+            
+            // Initial position (center)
+            conf.style.left = '50%';
+            conf.style.top = '50%';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Random explosion direction and distance
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 50 + Math.random() * 150;
+            const tx = Math.cos(angle) * velocity + 'px';
+            const ty = (Math.sin(angle) * velocity + 100) + 'px'; // Gravity effect in Y
+            const rot = (Math.random() * 720 - 360) + 'deg';
+            
+            conf.style.setProperty('--tx', tx);
+            conf.style.setProperty('--ty', ty);
+            conf.style.setProperty('--rot', rot);
+            
+            conf.style.animation = `confettiBurst ${1 + Math.random()}s cubic-bezier(0.1, 0.8, 0.3, 1) forwards`;
+            
+            zone.appendChild(conf);
+            setTimeout(() => conf.remove(), 2000);
+        }
+    }
+
     function checkAnswer() {
         if (!isPlaying) return;
         answerTimeout = null;
         if (parseInt(inputStr) === currentAns) { 
+            const oldScore = score;
             score++; 
+            
+            // Check for level up milestones
+            const milestones = [12, 20, 36, 48];
+            if (milestones.includes(score)) {
+                triggerConfetti();
+            }
+
             if (score % 5 === 0) { triggerWatering(); } else { triggerSunlight(); }
             document.getElementById('current-score').innerText = score; 
             updateGrowthZone();
@@ -604,7 +668,7 @@
         const nick = nickInput.value.trim() || "Sprout";
         const dateStr = new Date().toISOString().split('T')[0];
         const nowTs = Date.now();
-        lastPushTs = nowTs; // 이번 기록의 유일한 타임스탬프 저장
+        lastPushTs = nowTs; 
         try {
             await db.collection('rankings').doc(currentDifficulty).collection('players').add({ name: nick, score: score, lv: getLvName(score), date: dateStr, ts: nowTs });
             viewRankings(currentDifficulty);
@@ -624,12 +688,11 @@
             let rows = []; snap.forEach(doc => rows.push(doc.data())); rows.sort((a,b) => b.score - a.score);
             const tbody = document.getElementById('rank-list');
             tbody.innerHTML = rows.slice(0, 50).map((r, i) => {
-                const speed = (r.score / 60).toFixed(2);
+                const speed = r.score > 0 ? (60 / r.score).toFixed(2) : "0.00";
                 const d = new Date(r.ts || r.date);
                 const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
                 const emoji = getLevelEmoji(r.lv);
                 
-                // 타임스탬프(ts)가 일치하는 단 하나의 행만 강조
                 const isExactlyMyRecord = (r.ts === lastPushTs);
                 const rowIdAttr = isExactlyMyRecord ? 'id="my-current-row"' : '';
                 const highlightClass = isExactlyMyRecord ? 'my-rank-highlight' : '';
@@ -638,7 +701,7 @@
                     <td>${i+1}</td>
                     <td>${emoji} ${r.name}</td>
                     <td>${r.score}</td>
-                    <td>${speed}/s</td>
+                    <td>${speed}s/q</td>
                     <td>${mmdd}</td>
                 </tr>`;
             }).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
