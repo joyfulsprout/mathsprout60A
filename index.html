@@ -166,18 +166,16 @@
             50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(255,223,0,0.8)); }
         }
 
-        /* Fireworks Confetti Animation */
         .confetti {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: auto;
+            height: auto;
             z-index: 1000;
             pointer-events: none;
-            border-radius: 2px;
         }
         @keyframes confettiBurst {
             0% { 
-                transform: translate(0, 0) scale(1); 
+                transform: translate(0, 0) scale(0.5); 
                 opacity: 1; 
             }
             30% {
@@ -187,6 +185,16 @@
                 transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); 
                 opacity: 0; 
             }
+        }
+
+        @keyframes eagleFly {
+            0% { transform: translateX(200px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(-200px); opacity: 0; }
+        }
+        .eagle-anim {
+            animation: eagleFly 2s linear forwards;
         }
 
         .wrong { color: var(--accent-red) !important; animation: shake 0.3s; }
@@ -256,9 +264,9 @@
         
         <div class="home-info">
             <b>[Level System]</b><br>
-            - 👑 Math God: 48+ problems<br>
-            - 🎓 Professor Logic: 36 - 47<br>
-            - 🩺 Doctor Calculation: 20 - 35<br>
+            - 👑 Math God: 45+ problems<br>
+            - 🎓 Professor Logic: 33 - 44<br>
+            - 🩺 Doctor Calculation: 20 - 32<br>
             - 🌟 Brilliant Student: 12 - 19<br>
             - 👶 Seed Baby: Under 12<br><br>
             <b>[Ranking Reset]</b><br>
@@ -329,9 +337,9 @@
         </div>
         <div class="home-info" style="width: 100%; box-sizing: border-box;">
             <b>[Level System]</b><br>
-            - 👑 Math God: 48+ problems<br>
-            - 🎓 Professor Logic: 36 - 47<br>
-            - 🩺 Doctor Calculation: 20 - 35<br>
+            - 👑 Math God: 45+ problems<br>
+            - 🎓 Professor Logic: 33 - 44<br>
+            - 🩺 Doctor Calculation: 20 - 32<br>
             - 🌟 Brilliant Student: 12 - 19<br>
             - 👶 Seed Baby: Under 12
         </div>
@@ -365,7 +373,7 @@
     const MSG_LIB = {
         god: { title: "Math God", list: ["Are you a human calculator? That was incredible!", "Your brain is faster than a rocket ship! 🚀", "The Math King is here! Everyone, bow down!", "Did you just use magic? How are you so fast?", "You are 100% a math superhero!", "You finished that like a boss! No mistakes at all!", "Your brain must be made of super-gold!", "Is there a computer inside your head? Be honest!", "You just broke the world record in my heart!", "Your 'Math Tree' is so big, it’s touching the stars! ⭐"] },
         prof: { title: "Professor Logic", list: ["Hello, Professor! You know everything, don't you?", "You solved those like a pro! So smart!", "Your brain is working at 1000% speed today!", "Wow, you are the smartest kid in the universe!", "Logic Power! You found every answer so easily!", "I think you could teach the teacher today!", "You have a giant brain! It’s full of smart ideas.", "That was like a movie! A genius in action!", "Your math skills are totally sparkling! ✨", "Your spross has grown into a strong, wise tree!"] },
-        doc: { title: "Doctor Calculation", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your spross is blooming into a beautiful flower! 🌸"] },
+        doc: { title: "Doctor Calculation", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your spross is blooming into a beautiful flower! 🌸"] },
         student: { title: "Brilliant Student", list: ["Great job, superstar! You’re getting so fast!", "You’re a math whiz! Keep it up!", "I can see your brain growing bigger and bigger!", "You're a star student! High five! 🖐️", "Way to go! You’re getting better every time!", "Your sproout is growing so fast! It's so green!", "You solved so many! You should be proud!", "Smarty pants! You made look like a piece of cake.", "Keep going! You're becoming a math master!", "Your little sproout just grew a new leaf! Yay! 🍃"] },
         seed: { title: "Seed Baby", list: ["Thirsty sprout! Give it more math water! 💧", "Oops! Your brain-battery is still charging! ⚡", "So close! One more try to pop a leaf! 🌱", "Math-Monkeys stole your score! Get it back! 🐒", "Nice try! Your brain is doing push-ups! 💪"] }
     };
@@ -491,37 +499,33 @@
         }
     }
 
-    // Updated Firework Confetti Function
-    function triggerConfetti() {
+    function triggerCatConfetti(levelIdx) {
         const zone = document.getElementById('growth-zone');
-        const colors = ['#FFD700', '#FF6347', '#00FF7F', '#1E90FF', '#FF69B4', '#FFA500'];
-        const numConfetti = 40;
+        const cats = ['😸', '😻', '😹', '🙀'];
+        const selectedCat = cats[levelIdx] || '😺'; 
+        const numConfetti = 30; 
         
-        // Burst from the center of the growth zone
         for (let i = 0; i < numConfetti; i++) {
             const conf = document.createElement('div');
             conf.className = 'confetti';
-            
-            // Initial position (center)
+            conf.innerText = selectedCat;
+            conf.style.fontSize = '32px';
             conf.style.left = '50%';
             conf.style.top = '50%';
-            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             
-            // Random explosion direction and distance
             const angle = Math.random() * Math.PI * 2;
-            const velocity = 50 + Math.random() * 150;
+            const velocity = 80 + Math.random() * 200; 
             const tx = Math.cos(angle) * velocity + 'px';
-            const ty = (Math.sin(angle) * velocity + 100) + 'px'; // Gravity effect in Y
+            const ty = (Math.sin(angle) * velocity + 100) + 'px'; 
             const rot = (Math.random() * 720 - 360) + 'deg';
             
             conf.style.setProperty('--tx', tx);
             conf.style.setProperty('--ty', ty);
             conf.style.setProperty('--rot', rot);
-            
-            conf.style.animation = `confettiBurst ${1 + Math.random()}s cubic-bezier(0.1, 0.8, 0.3, 1) forwards`;
+            conf.style.animation = `confettiBurst ${1.5 + Math.random()}s cubic-bezier(0.1, 0.8, 0.3, 1) forwards`;
             
             zone.appendChild(conf);
-            setTimeout(() => conf.remove(), 2000);
+            setTimeout(() => conf.remove(), 2500);
         }
     }
 
@@ -529,13 +533,13 @@
         if (!isPlaying) return;
         answerTimeout = null;
         if (parseInt(inputStr) === currentAns) { 
-            const oldScore = score;
             score++; 
             
-            // Check for level up milestones
-            const milestones = [12, 20, 36, 48];
-            if (milestones.includes(score)) {
-                triggerConfetti();
+            // 완화된 마일스톤에 따른 고양이 효과
+            const milestones = [12, 20, 33, 45];
+            const mIdx = milestones.indexOf(score);
+            if (mIdx !== -1) {
+                triggerCatConfetti(mIdx); 
             }
 
             if (score % 5 === 0) { triggerWatering(); } else { triggerSunlight(); }
@@ -556,6 +560,7 @@
         rows.forEach(r => r.remove());
         let row1 = document.createElement('div'); row1.className = 'growth-row';
         let row2 = document.createElement('div'); row2.className = 'growth-row';
+        
         if (score <= 11) {
             if (score >= 1) {
                 let seedSize = 12 + (score * 2);
@@ -571,23 +576,63 @@
             row2.innerHTML = `<div class="growth-item" style="font-size:${size}px;">🌳</div>`;
         }
         else {
-            let treeSize = 40; 
-            let decoCount = score - 25; 
-            let icons = [];
-            for (let i = 1; i <= decoCount; i++) {
-                let icon = '🌼';
-                if (i % 2 === 1) icons.push(icon); else icons.unshift(icon);
+            let treeSize = 40;
+            let slots2 = new Array(11).fill(null); 
+            let slots1 = new Array(11).fill(null); 
+            
+            slots2[5] = '🌳';
+
+            if (score >= 26) {
+                let flowerCount = Math.min(score - 25, 4); 
+                let flowerPositions = [6, 4, 7, 3];
+                for(let i=0; i < flowerCount; i++) {
+                    slots2[flowerPositions[i]] = '🌼';
+                }
             }
-            let line1Icons = icons.slice(0, 10);
-            let slots = new Array(11).fill(null);
-            slots[5] = '🌳'; 
-            let leftIdx = 4;
-            let rightIdx = 6;
-            for(let k=0; k < line1Icons.length; k++) {
-                if(k % 2 === 0) { if(rightIdx <= 10) slots[rightIdx++] = line1Icons[k]; }
-                else { if(leftIdx >= 0) slots[leftIdx--] = line1Icons[k]; }
+
+            if (score >= 30) {
+                const animals = ['🐥', '🐤', '🐌', '🐞'];
+                const animalPositions = [8, 2, 10, 0];
+                let animalIdx = Math.floor((Math.min(score, 37) - 30) / 2);
+                for(let i=0; i <= animalIdx; i++) {
+                    slots2[animalPositions[i]] = animals[i];
+                }
             }
-            slots.forEach(item => {
+
+            if (score === 38) {
+                let eagle = document.createElement('div');
+                eagle.className = 'growth-item eagle-anim';
+                eagle.innerText = '🦅';
+                eagle.style.fontSize = '30px';
+                eagle.style.position = 'absolute';
+                eagle.style.top = '10px';
+                zone.appendChild(eagle);
+                setTimeout(() => eagle.remove(), 2000);
+            }
+
+            if (score >= 39) {
+                const flyingAnimals = ['🐝', '🦋', '🦅'];
+                let flyingIdx = Math.floor((score - 39) / 2);
+                for(let i=0; i <= flyingIdx; i++) {
+                    let animal = flyingAnimals[i % 3];
+                    let pos;
+                    if(i === 0) pos = 2;
+                    else if(i === 1) pos = 8;
+                    else if(i === 2) pos = 5;
+                    else pos = (i * 3) % 11;
+                    slots1[pos] = animal;
+                }
+            }
+
+            slots1.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'growth-item';
+                if (item) div.innerText = item;
+                div.style.fontSize = '24px';
+                row1.appendChild(div);
+            });
+
+            slots2.forEach(item => {
                 let div = document.createElement('div');
                 div.className = 'growth-item';
                 if (item) {
@@ -596,16 +641,6 @@
                 }
                 row2.appendChild(div);
             });
-            let line2Icons = icons.slice(10);
-            if (line2Icons.length > 0) {
-                line2Icons.forEach(item => {
-                    let div = document.createElement('div');
-                    div.className = 'growth-item';
-                    div.innerText = item;
-                    div.style.fontSize = '24px';
-                    row1.appendChild(div);
-                });
-            }
         }
         zone.appendChild(row1); zone.appendChild(row2);
     }
@@ -623,18 +658,14 @@
         showPage('result');
         const lv = getLvName(score);
         const emoji = getLevelOnlyEmoji(lv);
-        
         document.getElementById('res-lv-title').innerText = `${emoji} ${MSG_LIB[getMsgKey(lv)].title}`;
         document.getElementById('res-random-msg').innerText = pick(MSG_LIB[getMsgKey(lv)].list);
-        
         const zone = document.getElementById('growth-zone');
         const rows = zone.querySelectorAll('.growth-row');
         const displayBox = document.getElementById('res-growth-display');
         displayBox.innerHTML = "";
         rows.forEach(r => displayBox.appendChild(r.cloneNode(true)));
-
         document.getElementById('res-score-msg').innerText = `You solved : ${score}`;
-
         const rankMsg = document.getElementById('res-rank-msg');
         rankMsg.innerText = "Calculating rank...";
         try {
@@ -655,7 +686,7 @@
     }
     function getMsgKey(lv) { return {'Math God':'god', 'Professor Logic':'prof', 'Doctor Calculation':'doc', 'Brilliant Student':'student', 'Seed Baby':'seed'}[lv]; }
     function getLvName(s) {
-        if (s >= 48) return "Math God"; if (s >= 36) return "Professor Logic";
+        if (s >= 45) return "Math God"; if (s >= 33) return "Professor Logic";
         if (s >= 20) return "Doctor Calculation"; if (s >= 12) return "Brilliant Student";
         return "Seed Baby";
     }
@@ -665,15 +696,26 @@
 
     async function pushRank() {
         const nickInput = document.getElementById('nickname');
+        const submitBtn = document.querySelector('.btn-submit');
+        const originalText = submitBtn.innerText;
         const nick = nickInput.value.trim() || "sprout";
         const dateStr = new Date().toISOString().split('T')[0];
         const nowTs = Date.now();
-        lastPushTs = nowTs; 
+        lastPushTs = nowTs;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving...";
+        
         try {
             await db.collection('rankings').doc(currentDifficulty).collection('players').add({ name: nick, score: score, lv: getLvName(score), date: dateStr, ts: nowTs });
             viewRankings(currentDifficulty);
             setTimeout(() => { alert("Rank saved successfully!"); }, 100);
-        } catch (e) { alert("Error saving score."); console.error(e); }
+        } catch (e) { 
+            alert("Error saving score."); 
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+            console.error(e); 
+        }
     }
 
     async function viewRankings(mode = 'cake') {
@@ -692,11 +734,9 @@
                 const d = new Date(r.ts || r.date);
                 const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
                 const emoji = getLevelEmoji(r.lv);
-                
                 const isExactlyMyRecord = (r.ts === lastPushTs);
                 const rowIdAttr = isExactlyMyRecord ? 'id="my-current-row"' : '';
                 const highlightClass = isExactlyMyRecord ? 'my-rank-highlight' : '';
-
                 return `<tr ${rowIdAttr} class="${getLevelClass(r.lv)} ${highlightClass}">
                     <td>${i+1}</td>
                     <td>${emoji} ${r.name}</td>
@@ -705,7 +745,6 @@
                     <td>${mmdd}</td>
                 </tr>`;
             }).join('') || "<tr><td colspan='5'>No rankings yet.</td></tr>";
-
             setTimeout(() => {
                 const myRow = document.getElementById('my-current-row');
                 const container = document.getElementById('rank-scroll-container');
@@ -715,7 +754,6 @@
                     container.scrollTop = rowPos - (containerHeight / 2);
                 }
             }, 100);
-
         } catch (e) { console.error(e); }
     }
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -727,5 +765,3 @@
 </script>
 </body>
 </html>
-
-
