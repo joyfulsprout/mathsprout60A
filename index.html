@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Math Sprout 60 Seconds: Fun Math Challenge for Kids</title>
+    <title>Math Spross 60 Seconds: Fun Math Challenge for Kids</title>
 
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
@@ -247,7 +247,7 @@
 
 <div id="game-box">
     <div id="page-home" class="page active">
-        <h1>🌱 Math Sprout 60 Seconds</h1>
+        <h1>🌱 Math Spross 60 Seconds</h1>
         <p>Choose your math garden!</p>
         <button type="button" class="btn btn-cake" onclick="javascript:initGame('cake');">🍰 Piece of Cake</button>
         <button type="button" class="btn btn-pepper" onclick="javascript:initGame('pepper');">🌶️ Hot Pepper</button>
@@ -269,7 +269,7 @@
     <div id="page-play" class="page">
         <div id="game-header">
             <span class="header-score">✅ <span id="current-score">0</span></span>
-            <span class="header-title-mode">🌱 Math Sprout <span id="display-mode-emoji"></span></span>
+            <span class="header-title-mode">🌱 Math spross <span id="display-mode-emoji"></span></span>
             <span class="header-timer">⏱️ <span id="timer">60</span>s</span>
         </div>
 
@@ -303,7 +303,7 @@
         <p style="color: #000000; font-weight: bold; margin: 0 0 5px 0;">Welcome to the leader board!</p>
         <p id="res-rank-msg" style="color: #000033; font-weight: bold; font-size: 18px; margin: 0 0 15px 0; text-align: center;"></p>
         <div id="rank-submission" style="width: 100%;">
-            <input type="text" id="nickname" name="nickname" autocomplete="nickname" placeholder="Nickname" maxlength="10" 
+            <input type="text" id="nickname" name="nickname" autocomplete="nickname" placeholder="Nickname" maxlength="12" 
                    style="display: block; padding:15px; width:85%; border:1px solid #ddd; border-radius:10px; margin: 0 auto 15px auto; font-size:16px; text-align:center; background: white;">
             
             <div style="display:flex; gap:10px; justify-content:center;">
@@ -346,15 +346,15 @@
         </div>
     </div>
 
-    <footer>Copyright © 2026 Joyful Sprout. All rights reserved.</footer>
+    <footer>Copyright © 2026 Joyful Spross. All rights reserved.</footer>
 </div>
 
 <script>
     const firebaseConfig = {
     	apiKey: "AIzaSyAtUbdsfsUpf1ribq8ZWP8TC0j6ZNxB010", 
-    	authDomain: "math-sprout-60.firebaseapp.com",
+    	authDomain: "math-sproout-60.firebaseapp.com",
     	projectId: "math-sprout-60",
-    	storageBucket: "math-sprout-60.firebasestorage.app",
+    	storageBucket: "math-sproout-60.firebasestorage.app",
     	messagingSenderId: "792661788916",
     	appId: "1:792661788916:web:d26ea26323cb3389ec76a1",
     	measurementId: "G-2DRXMSFP2P"
@@ -364,10 +364,10 @@
 
     const MSG_LIB = {
         god: { title: "Math God", list: ["Are you a human calculator? That was incredible!", "Your brain is faster than a rocket ship! 🚀", "The Math King is here! Everyone, bow down!", "Did you just use magic? How are you so fast?", "You are 100% a math superhero!", "You finished that like a boss! No mistakes at all!", "Your brain must be made of super-gold!", "Is there a computer inside your head? Be honest!", "You just broke the world record in my heart!", "Your 'Math Tree' is so big, it’s touching the stars! ⭐"] },
-        prof: { title: "Professor Logic", list: ["Hello, Professor! You know everything, don't you?", "You solved those like a pro! So smart!", "Your brain is working at 1000% speed today!", "Wow, you are the smartest kid in the universe!", "Logic Power! You found every answer so easily!", "I think you could teach the teacher today!", "You have a giant brain! It’s full of smart ideas.", "That was like a movie! A genius in action!", "Your math skills are totally sparkling! ✨", "Your sprout has grown into a strong, wise tree!"] },
-        doc: { title: "Doctor Calculation", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your sprout is blooming into a beautiful flower! 🌸"] },
-        student: { title: "Brilliant Student", list: ["Great job, superstar! You’re getting so fast!", "You’re a math whiz! Keep it up!", "I can see your brain growing bigger and bigger!", "You're a star student! High five! 🖐️", "Way to go! You’re getting better every time!", "Your sprout is growing so fast! It's so green!", "You solved so many! You should be proud!", "Smarty pants! You made look like a piece of cake.", "Keep going! You're becoming a math master!", "Your little sprout just grew a new leaf! Yay! 🍃"] },
-        seed: { title: "Seed Baby", list: ["Thirsty Sprout! Give it more math water! 💧", "Oops! Your brain-battery is still charging! ⚡", "So close! One more try to pop a leaf! 🌱", "Math-Monkeys stole your score! Get it back! 🐒", "Nice try! Your brain is doing push-ups! 💪"] }
+        prof: { title: "Professor Logic", list: ["Hello, Professor! You know everything, don't you?", "You solved those like a pro! So smart!", "Your brain is working at 1000% speed today!", "Wow, you are the smartest kid in the universe!", "Logic Power! You found every answer so easily!", "I think you could teach the teacher today!", "You have a giant brain! It’s full of smart ideas.", "That was like a movie! A genius in action!", "Your math skills are totally sparkling! ✨", "Your spross has grown into a strong, wise tree!"] },
+        doc: { title: "Doctor Calculation", list: ["The Math Doctor is in! You fixed every problem.", "You have 'Super Eyes' for finding the right numbers!", "Doctor, you are a genius at counting!", "Your brain is so healthy and strong! Good job!", "You cut through those problems like a master!", "How do you do it? You make math look so easy!", "Your brain is a math machine! Clank, clank, win!", "A perfect check-up! Every answer was spot on.", "You're getting smarter every second!", "Your spross is blooming into a beautiful flower! 🌸"] },
+        student: { title: "Brilliant Student", list: ["Great job, superstar! You’re getting so fast!", "You’re a math whiz! Keep it up!", "I can see your brain growing bigger and bigger!", "You're a star student! High five! 🖐️", "Way to go! You’re getting better every time!", "Your sproout is growing so fast! It's so green!", "You solved so many! You should be proud!", "Smarty pants! You made look like a piece of cake.", "Keep going! You're becoming a math master!", "Your little sproout just grew a new leaf! Yay! 🍃"] },
+        seed: { title: "Seed Baby", list: ["Thirsty sprout! Give it more math water! 💧", "Oops! Your brain-battery is still charging! ⚡", "So close! One more try to pop a leaf! 🌱", "Math-Monkeys stole your score! Get it back! 🐒", "Nice try! Your brain is doing push-ups! 💪"] }
     };
 
     let currentDifficulty = '', timeLeft = 0, timerObj, score = 0, currentAns = 0, inputStr = "", isGameOver = false, isPlaying = false;
@@ -665,7 +665,7 @@
 
     async function pushRank() {
         const nickInput = document.getElementById('nickname');
-        const nick = nickInput.value.trim() || "Sprout";
+        const nick = nickInput.value.trim() || "sprout";
         const dateStr = new Date().toISOString().split('T')[0];
         const nowTs = Date.now();
         lastPushTs = nowTs; 
@@ -727,3 +727,4 @@
 </script>
 </body>
 </html>
+
